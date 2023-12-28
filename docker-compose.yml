@@ -1,0 +1,20 @@
+# 指定 Docker Compose 的版本
+version: '3'
+# 定義服務
+services:
+  # 服務名為 nuxt-tres
+  nuxt-tres:
+    # 使用 node 的 Docker 映像作為基礎
+    image: node:18.18.1
+    # 設定容器名稱，未來方便查看專案執行狀況
+    container_name: 'nuxt3_tres'
+    # 設定進入容器時，所在的資料夾
+    working_dir: /app
+    # 將本地的 ./ 目錄映射到容器內的 /app 目錄
+    volumes:
+      - ./:/app
+    # 設定啟動應用程序時不執行任何命令，改成自己進入容器去執行 run dev
+    command: npm run dev
+    # 設定端口：主機端口 對到 容器端口(這樣就可以用“主機網址：主機端口”於電腦開啟該應用程序)
+    ports:
+      - 3000:3000
