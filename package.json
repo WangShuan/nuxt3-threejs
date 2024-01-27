@@ -19,6 +19,8 @@
     "vue-router": "^4.2.5"
   },
   "dependencies": {
-    "@types/three": "^0.160.0"
+    "@types/three": "^0.160.0",
+    "cannon-es": "^0.20.0",
+    "cannon-es-debugger": "^1.0.0"
   }
 }
