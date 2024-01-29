@@ -5,21 +5,19 @@
 </template>
 
 <script setup>
-import { Scene, AxesHelper, PerspectiveCamera, DirectionalLight, Vector2, Raycaster, SphereGeometry, WebGLRenderer, PlaneGeometry, AnimationMixer, Clock, LoopOnce, MathUtils, BoxGeometry, MeshBasicMaterial, Mesh, MeshStandardMaterial, Color } from 'three';
+import { Scene, PerspectiveCamera, DirectionalLight, Vector2, Raycaster, SphereGeometry, WebGLRenderer, PlaneGeometry, BoxGeometry, Mesh, MeshStandardMaterial, Color } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import * as CANNON from 'cannon-es'
 
-
+const scene = new Scene()
 
 const { width, height } = useWindowSize()
-
 const aspectRatio = computed(() => width.value / height.value)
-
-const scene = new Scene()
 const camera = new PerspectiveCamera(50, aspectRatio.value, 0.1, 1000);
 camera.position.set(0, 2, 50)
 camera.lookAt(0, 0, 0)
 scene.add(camera)
+
 const light = new DirectionalLight(0xffffff, 2);
 light.position.set(0, 10, 20)
 scene.add(light);
@@ -27,19 +25,19 @@ scene.add(light);
 const world = new CANNON.World()
 world.gravity.set(0, -9.82, 0)
 
+const experience = ref()
 let renderer;
 let controls;
-const experience = ref()
 const initRenderer = () => {
   if (experience.value) {
     renderer = new WebGLRenderer({ canvas: experience.value });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.shadowMap.enabled = true
-    controls = new OrbitControls(camera, experience.value)
     updateRender()
+
+    controls = new OrbitControls(camera, experience.value)
   }
 }
-
 const updateRender = () => {
   renderer.setSize(width.value, height.value)
   renderer.render(scene, camera)
@@ -69,20 +67,14 @@ const createFloor = () => {
   planeBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2)
   world.addBody(planeBody)
 
-  const floor2 = new Mesh(new PlaneGeometry(1000, 1000), new MeshStandardMaterial());
-  floor2.position.z = -2;
-  scene.add(floor2);
-  const planeShape2 = new CANNON.Plane()
-  const planeBody2 = new CANNON.Body({ mass: 0 })
-  planeBody2.addShape(planeShape2)
-  planeBody2.position.z = floor2.position.z
-  world.addBody(planeBody2)
-
-  const planeShape3 = new CANNON.Plane()
-  const planeBody3 = new CANNON.Body({ mass: 0.0001 })
-  planeBody3.addShape(planeShape3)
-  planeBody3.position.z = -floor2.position.z
-  world.addBody(planeBody3)
+  const bgPlane = new Mesh(new PlaneGeometry(1000, 1000), new MeshStandardMaterial());
+  bgPlane.position.z = -2;
+  scene.add(bgPlane);
+  const bgPlaneShape = new CANNON.Plane()
+  const bgPlaneBody = new CANNON.Body({ mass: 0 })
+  bgPlaneBody.addShape(bgPlaneShape)
+  bgPlaneBody.position.z = bgPlane.position.z
+  world.addBody(bgPlaneBody)
 };
 createFloor();
 
@@ -160,11 +152,8 @@ const createBall = (x, y) => {
   ballsBody.push(ballBody)
 }
 
-// const cannonDebugger = CannonDebugger(scene, world)
-
 const loop = () => {
   controls.update()
-
   world.step(1 / 60)
 
   if (ballsMesh.length) {
@@ -178,7 +167,6 @@ const loop = () => {
     dominoMesh[i].position.set(dominoBody[i].position.x, dominoBody[i].position.y, dominoBody[i].position.z)
     dominoMesh[i].quaternion.set(dominoBody[i].quaternion.x, dominoBody[i].quaternion.y, dominoBody[i].quaternion.z, dominoBody[i].quaternion.w)
   }
-
 
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
